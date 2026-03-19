@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session
 import sqlite3
 import random
 import string
@@ -9,7 +9,6 @@ app = Flask(__name__)
 app.secret_key = "secret123"
 
 
-# ---------------- DATABASE ----------------
 def init_db():
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
@@ -39,7 +38,6 @@ def init_db():
 init_db()
 
 
-# ---------------- HELPERS ----------------
 def generate_short_code(length=6):
     chars = string.ascii_letters + string.digits
     return "".join(random.choices(chars, k=length))
@@ -50,7 +48,11 @@ def ensure_static_folder():
         os.makedirs("static")
 
 
-# ---------------- AUTH ----------------
+@app.route("/")
+def home():
+    return redirect("/login")
+
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     message = ""
@@ -102,7 +104,7 @@ def login():
         if user:
             session["user_id"] = user[0]
             session["username"] = user[1]
-            return redirect("/")
+            return redirect("/dashboard")
 
         message = "Invalid username or password."
 
@@ -115,9 +117,8 @@ def logout():
     return redirect("/login")
 
 
-# ---------------- HOME ----------------
-@app.route("/", methods=["GET", "POST"])
-def index():
+@app.route("/shorten", methods=["GET", "POST"])
+def shorten():
     if "user_id" not in session:
         return redirect("/login")
 
@@ -160,35 +161,6 @@ def index():
     return render_template("index.html", message=message)
 
 
-# ---------------- REDIRECT ----------------
-@app.route("/<short>")
-def redirect_url(short):
-    # avoid conflict with known routes
-    if short in ["login", "register", "logout", "dashboard", "delete", "static"]:
-        return redirect("/")
-
-    conn = sqlite3.connect("database.db")
-    cur = conn.cursor()
-
-    row = cur.execute(
-        "SELECT original FROM urls WHERE short=?",
-        (short,)
-    ).fetchone()
-
-    if row:
-        cur.execute(
-            "UPDATE urls SET clicks = clicks + 1 WHERE short=?",
-            (short,)
-        )
-        conn.commit()
-        conn.close()
-        return redirect(row[0])
-
-    conn.close()
-    return "URL Not Found"
-
-
-# ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
 def dashboard():
     if "user_id" not in session:
@@ -207,7 +179,6 @@ def dashboard():
     return render_template("dashboard.html", data=data)
 
 
-# ---------------- DELETE ----------------
 @app.route("/delete/<short>")
 def delete(short):
     if "user_id" not in session:
@@ -230,7 +201,34 @@ def delete(short):
     return redirect("/dashboard")
 
 
-# ---------------- RUN ----------------
+@app.route("/<short>")
+def redirect_url(short):
+    reserved_routes = ["login", "register", "logout", "dashboard", "shorten", "delete", "static"]
+
+    if short in reserved_routes:
+        return redirect("/login")
+
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+
+    row = cur.execute(
+        "SELECT original FROM urls WHERE short=?",
+        (short,)
+    ).fetchone()
+
+    if row:
+        cur.execute(
+            "UPDATE urls SET clicks = clicks + 1 WHERE short=?",
+            (short,)
+        )
+        conn.commit()
+        conn.close()
+        return redirect(row[0])
+
+    conn.close()
+    return "URL Not Found"
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
