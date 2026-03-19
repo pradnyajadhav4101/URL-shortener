@@ -24,7 +24,7 @@
             <div class="alert">{{ message }}</div>
             {% endif %}
 
-            <form method="POST" class="main-form">
+            <form method="POST" action="/shorten" class="main-form">
                 <input type="url" name="url" placeholder="Enter long URL" required>
                 <input type="text" name="custom" placeholder="Custom short code (optional)">
                 <button type="submit">Shorten URL</button>

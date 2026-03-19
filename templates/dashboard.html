@@ -10,13 +10,13 @@
 <body>
     <div class="dashboard-wrapper">
         <div class="card dashboard-card">
-            <div class="topbar dashboard-topbar">
+            <div class="topbar">
                 <div>
                     <h2>Analytics Dashboard</h2>
-                    <p class="subtext">Manage your shortened links</p>
+                    <p class="subtext">Manage your links</p>
                 </div>
                 <div class="top-actions">
-                    <a class="small-btn" href="/">Home</a>
+                    <a class="small-btn" href="/shorten">Home</a>
                     <a class="small-btn danger-btn" href="/logout">Logout</a>
                 </div>
             </div>
@@ -37,9 +37,7 @@
                     {% for d in data %}
                     <tr>
                         <td title="{{ d[0] }}">{{ d[0] }}</td>
-                        <td>
-                            <a href="/{{ d[1] }}" target="_blank">{{ d[1] }}</a>
-                        </td>
+                        <td><a href="/{{ d[1] }}" target="_blank">{{ d[1] }}</a></td>
                         <td>{{ d[2] }}</td>
                         <td>
                             <a href="/delete/{{ d[1] }}"
@@ -64,14 +62,12 @@
         const labels = rawData.map(item => item[1]);
         const clicks = rawData.map(item => item[2]);
 
-        const ctx = document.getElementById('chart');
-
-        new Chart(ctx, {
-            type: 'bar',
+        new Chart(document.getElementById("chart"), {
+            type: "bar",
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Clicks',
+                    label: "Clicks",
                     data: clicks
                 }]
             },

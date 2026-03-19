@@ -10,20 +10,20 @@
     <div class="auth-wrapper">
         <div class="card auth-card">
             <h2>Welcome Back</h2>
-            <p class="subtext">Login to continue shortening links</p>
+            <p class="subtext">Login to continue</p>
 
             {% if message %}
             <div class="alert">{{ message }}</div>
             {% endif %}
 
-            <form method="POST">
+            <form method="POST" action="/login">
                 <input type="text" name="username" placeholder="Username" required>
                 <input type="password" name="password" placeholder="Password" required>
                 <button type="submit">Login</button>
             </form>
 
             <p class="bottom-text">
-                Don’t have an account?
+                Don't have an account?
                 <a href="/register">Register</a>
             </p>
         </div>

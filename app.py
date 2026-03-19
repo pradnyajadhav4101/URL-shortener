@@ -104,7 +104,7 @@ def login():
         if user:
             session["user_id"] = user[0]
             session["username"] = user[1]
-            return redirect("/dashboard")
+            return redirect("/shorten")
 
         message = "Invalid username or password."
 
